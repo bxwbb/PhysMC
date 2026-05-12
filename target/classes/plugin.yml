@@ -1,0 +1,8 @@
+name: PhysMC
+main: com.bxwbb.PhysMC
+version: 1.0.0
+api-version: 1.21
+
+commands:
+  physmc:
+    description: 控制物理系统
