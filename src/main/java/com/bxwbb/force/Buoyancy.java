@@ -1,7 +1,7 @@
 package com.bxwbb.force;
 
-import com.bxwbb.math.Vector3;
 import com.bxwbb.phy.RigidBody;
+import org.joml.Vector3d;
 
 public class Buoyancy implements ForceGenerator {
 
@@ -9,9 +9,9 @@ public class Buoyancy implements ForceGenerator {
     public double volume;
     public double waterHeight;
     public double liquidDensity = 1000d;
-    public Vector3 centerOfBuoyancy;
+    public Vector3d centerOfBuoyancy;
 
-    public Buoyancy(Vector3 centerOfBuoyancy, double maxDepth, double volume, double waterHeight) {
+    public Buoyancy(Vector3d centerOfBuoyancy, double maxDepth, double volume, double waterHeight) {
         this.maxDepth = maxDepth;
         this.volume = volume;
         this.waterHeight = waterHeight;
@@ -20,17 +20,18 @@ public class Buoyancy implements ForceGenerator {
 
     @Override
     public void updateForce(RigidBody body, double duration) {
-        Vector3 pointInWorld = body.getPointInWorldSpace(centerOfBuoyancy);
+        Vector3d pointInWorld = body.getPointInWorldSpace(centerOfBuoyancy);
         double depth = pointInWorld.y;
         if (depth >= waterHeight + maxDepth) return;
-        Vector3 force = new Vector3(0, 0, 0);
+
+        Vector3d force = new Vector3d();
         if (depth <= waterHeight - maxDepth) {
             force.y = liquidDensity * volume;
             body.addForceAtBodyPoint(force, centerOfBuoyancy);
             return;
         }
-        force.y = liquidDensity * volume *
-                (depth - maxDepth - waterHeight) / 2 * maxDepth;
+
+        force.y = liquidDensity * volume * (depth - maxDepth - waterHeight) / 2 * maxDepth;
         body.addForceAtBodyPoint(force, centerOfBuoyancy);
     }
 }

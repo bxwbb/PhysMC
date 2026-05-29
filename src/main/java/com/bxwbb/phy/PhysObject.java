@@ -1,20 +1,20 @@
 package com.bxwbb.phy;
 
-import com.bxwbb.math.Vector3;
 import com.bxwbb.util.ObjectUtil;
 import org.bukkit.entity.Display;
+import org.joml.Vector3d;
 
 import java.util.List;
 
 public abstract class PhysObject {
 
-    public Vector3 velocity = new Vector3();
-    public Vector3 acceleration = new Vector3();
-    public Vector3 forceAccum = new Vector3();
+    public Vector3d velocity = new Vector3d();
+    public Vector3d acceleration = new Vector3d();
+    public Vector3d forceAccum = new Vector3d();
     public double damping = 0.995;
     public double inverseMass = 1 / 5d;
 
-    public static Vector3 gravity = new Vector3(0, 10, 0);
+    public static Vector3d gravity = new Vector3d(0, 10, 0);
 
     public abstract List<Display> getAllDisplay();
 
@@ -22,27 +22,25 @@ public abstract class PhysObject {
         ObjectUtil.addDisplay(name, getAllDisplay().toArray(new Display[0]));
     }
 
-    public abstract Vector3 getPosition();
+    public abstract Vector3d getPosition();
 
-    public abstract void setPosition(Vector3 location);
+    public abstract void setPosition(Vector3d location);
 
     public void integrate(double deltaTime) {
         assert (deltaTime > 0.0);
-        setPosition(getPosition().addNew(velocity.mulNew(deltaTime)));
-        Vector3 resultingAcc = new Vector3();
-        resultingAcc.add(acceleration);
-        resultingAcc.addScaledVector(forceAccum, inverseMass);
-        velocity.addScaledVector(resultingAcc, deltaTime);
+        setPosition(new Vector3d(getPosition()).fma(deltaTime, velocity));
+        Vector3d resultingAcc = new Vector3d(acceleration).fma(inverseMass, forceAccum);
+        velocity.fma(deltaTime, resultingAcc);
         velocity.mul(Math.pow(damping, deltaTime));
         clearAccumulators();
     }
 
-    public void addForce(Vector3 force) {
+    public void addForce(Vector3d force) {
         forceAccum.add(force);
     }
 
     public void clearAccumulators() {
-        acceleration.clear();
+        acceleration.zero();
     }
 
     public boolean hasFiniteMass() {

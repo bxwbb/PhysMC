@@ -1,11 +1,13 @@
 package com.bxwbb.cd;
 
-import com.bxwbb.math.Vector3;
+import org.joml.Vector3d;
 
 public class IntersectionTests {
 
-    public static double transformToAxis(CollisionBox box, Vector3 axis) {
-        return box.halfSize.x * Math.abs(axis.dot(box.getAxis(0))) + box.halfSize.y * Math.abs(axis.dot(box.getAxis(1))) + box.halfSize.z * Math.abs(axis.dot(box.getAxis(2)));
+    public static double transformToAxis(CollisionBox box, Vector3d axis) {
+        return box.halfSize.x * Math.abs(axis.dot(box.getAxis(0))) +
+                box.halfSize.y * Math.abs(axis.dot(box.getAxis(1))) +
+                box.halfSize.z * Math.abs(axis.dot(box.getAxis(2)));
     }
 
     public static boolean boxAndHalfSpace(CollisionBox box, CollisionPlane plane) {
@@ -14,39 +16,31 @@ public class IntersectionTests {
         return boxDistance <= plane.offset;
     }
 
-    public static boolean overlapOnAxis(CollisionBox one, CollisionBox two, Vector3 axis, Vector3 toCentre) {
+    public static boolean overlapOnAxis(CollisionBox one, CollisionBox two, Vector3d axis, Vector3d toCentre) {
+        if (axis.lengthSquared() < 0.0001d) return true;
+        axis.normalize();
         double oneProject = transformToAxis(one, axis);
         double twoProject = transformToAxis(two, axis);
         double distance = Math.abs(toCentre.dot(axis));
-        return (distance < oneProject + twoProject);
+        return distance < oneProject + twoProject;
     }
 
     public static boolean boxAndBox(CollisionBox one, CollisionBox two) {
-        Vector3 toCentre = two.getAxis(3).subNew(one.getAxis(3));
+        Vector3d toCentre = two.getAxis(3).sub(one.getAxis(3), new Vector3d());
 
-        return (
-                TEST_OVERLAP(one, two, one.getAxis(0), toCentre) &&
-                        TEST_OVERLAP(one, two, one.getAxis(1), toCentre) &&
-                        TEST_OVERLAP(one, two, one.getAxis(2), toCentre) &&
-                        TEST_OVERLAP(one, two, two.getAxis(0), toCentre) &&
-                        TEST_OVERLAP(one, two, two.getAxis(1), toCentre) &&
-                        TEST_OVERLAP(one, two, two.getAxis(2), toCentre) &&
-                        TEST_OVERLAP(one, two, one.getAxis(0).componentProductNew(two.getAxis(0)), toCentre) &&
-                        TEST_OVERLAP(one, two, one.getAxis(0).componentProductNew(two.getAxis(1)), toCentre) &&
-                        TEST_OVERLAP(one, two, one.getAxis(0).componentProductNew(two.getAxis(2)), toCentre) &&
-                        TEST_OVERLAP(one, two, one.getAxis(1).componentProductNew(two.getAxis(0)), toCentre) &&
-                        TEST_OVERLAP(one, two, one.getAxis(1).componentProductNew(two.getAxis(1)), toCentre) &&
-                        TEST_OVERLAP(one, two, one.getAxis(1).componentProductNew(two.getAxis(2)), toCentre) &&
-                        TEST_OVERLAP(one, two, one.getAxis(2).componentProductNew(two.getAxis(0)), toCentre) &&
-                        TEST_OVERLAP(one, two, one.getAxis(2).componentProductNew(two.getAxis(1)), toCentre) &&
-                        TEST_OVERLAP(one, two, one.getAxis(2).componentProductNew(two.getAxis(2)), toCentre)
-        );
-    }
+        for (int i = 0; i < 3; i++) {
+            if (!overlapOnAxis(one, two, one.getAxis(i), toCentre)) return false;
+            if (!overlapOnAxis(one, two, two.getAxis(i), toCentre)) return false;
+        }
 
-    public static boolean TEST_OVERLAP(CollisionBox one,
-                                       CollisionBox two,
-                                       Vector3 axis,
-                                       Vector3 toCentre) {
-        return overlapOnAxis(one, two, (axis), toCentre);
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                if (!overlapOnAxis(one, two, one.getAxis(i).cross(two.getAxis(j), new Vector3d()), toCentre)) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 }

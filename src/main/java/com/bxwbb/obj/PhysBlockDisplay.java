@@ -1,8 +1,8 @@
 package com.bxwbb.obj;
 
+import com.bxwbb.PhysConfig;
+import com.bxwbb.PhysMC;
 import com.bxwbb.phy.RigidBody;
-import com.bxwbb.math.Quaternion;
-import com.bxwbb.math.Vector3;
 import com.bxwbb.util.SpawnUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -10,7 +10,9 @@ import org.bukkit.Material;
 import org.bukkit.entity.BlockDisplay;
 import org.bukkit.entity.Display;
 import org.bukkit.util.Transformation;
+import org.joml.Quaterniond;
 import org.joml.Quaternionf;
+import org.joml.Vector3d;
 import org.joml.Vector3f;
 
 import java.util.List;
@@ -24,11 +26,10 @@ public class PhysBlockDisplay extends RigidBody {
         blockDisplay.setBlock(Bukkit.createBlockData(Material.COMMAND_BLOCK));
         blockDisplay.setShadowRadius(0);
         blockDisplay.setShadowStrength(0);
+        configureInterpolation();
         blockDisplay.setPersistent(false);
 
-        position.x = blockDisplay.getX();
-        position.y = blockDisplay.getY();
-        position.z = blockDisplay.getZ();
+        position.set(blockDisplay.getX(), blockDisplay.getY(), blockDisplay.getZ());
 
         calculateDerivedData();
     }
@@ -39,31 +40,45 @@ public class PhysBlockDisplay extends RigidBody {
     }
 
     @Override
-    public Vector3 getPosition() {
+    public Vector3d getPosition() {
         return position;
     }
 
     @Override
-    public void setPosition(Vector3 location) {
-        position.clear();
-        position.add(location);
+    public void setPosition(Vector3d location) {
+        position.set(location);
     }
 
     @Override
     public void tick() {
+        configureInterpolation();
         blockDisplay.teleport(new Location(blockDisplay.getWorld(), position.x, position.y, position.z, 0, 0));
 
         Transformation old = blockDisplay.getTransformation();
+        Vector3f scale = new Vector3f(old.getScale());
+        Quaternionf rotation = toJomlQuat(orientation);
+        Vector3f translation = new Vector3f(-scale.x * 0.5f, -scale.y * 0.5f, -scale.z * 0.5f);
+        rotation.transform(translation);
         blockDisplay.setTransformation(new Transformation(
-                new Vector3f(0,0,0),
-                toJomlQuat(orientation),
-                old.getScale(),
+                translation,
+                rotation,
+                scale,
                 new Quaternionf(0,0,0,1)
         ));
     }
 
-    private Quaternionf toJomlQuat(Quaternion q) {
-        return new Quaternionf((float) q.i, (float) q.j, (float) q.k, (float) q.r);
+    private void configureInterpolation() {
+        blockDisplay.setInterpolationDelay(getInt(PhysConfig.DISPLAY_INTERPOLATION_DELAY));
+        blockDisplay.setInterpolationDuration(getInt(PhysConfig.DISPLAY_INTERPOLATION_DURATION));
+        blockDisplay.setTeleportDuration(getInt(PhysConfig.DISPLAY_TELEPORT_DURATION));
+    }
+
+    private int getInt(String path) {
+        return PhysMC.getPlugin(PhysMC.class).getConfig().getInt(path);
+    }
+
+    private Quaternionf toJomlQuat(Quaterniond q) {
+        return new Quaternionf((float) q.x, (float) q.y, (float) q.z, (float) q.w);
     }
 
     public BlockDisplay getBlockDisplay() {

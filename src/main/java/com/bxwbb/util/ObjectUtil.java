@@ -25,6 +25,7 @@ public class ObjectUtil {
         for (Display display : displays.get(key)) {
             SpawnUtil.removeDisplay(display);
         }
+        displays.remove(key);
     }
 
     public static void removeAll() {

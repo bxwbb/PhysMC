@@ -1,8 +1,6 @@
 package com.bxwbb.cd;
 
-import com.bxwbb.math.Vector3;
-
-import java.util.List;
+import org.joml.Vector3d;
 
 public class ContactResolver {
 
@@ -44,9 +42,9 @@ public class ContactResolver {
 
     public void adjustPositions(Contact[] c, int numContacts, double duration) {
         int i, index;
-        Vector3[] linearChange = {new Vector3(), new Vector3()}, angularChange = {new Vector3(), new Vector3()};
+        Vector3d[] linearChange = {new Vector3d(), new Vector3d()}, angularChange = {new Vector3d(), new Vector3d()};
         double max;
-        Vector3 deltaPosition;
+        Vector3d deltaPosition;
         positionIterationsUsed = 0;
         while (positionIterationsUsed < positionIterations) {
             max = positionEpsilon;
@@ -68,8 +66,9 @@ public class ContactResolver {
                     if (c[i].body[b] != null) {
                         for (int d = 0; d < 2; d++) {
                             if (c[i].body[b] == c[index].body[d]) {
-                                deltaPosition = linearChange[d].addNew(angularChange[d].vectorProductNew(c[i].relativeContactPosition[b]));
-                                c[i].penetration += deltaPosition.scalarProduct(c[i].contactNormal) * (b != 0 ? 1 : -1);
+                                deltaPosition = new Vector3d(linearChange[d])
+                                        .add(new Vector3d(angularChange[d]).cross(c[i].relativeContactPosition[b]));
+                                c[i].penetration += deltaPosition.dot(c[i].contactNormal) * (b != 0 ? 1 : -1);
                             }
                         }
                     }
@@ -81,8 +80,8 @@ public class ContactResolver {
     public void adjustVelocities(Contact[] c,
                                  int numContacts,
                                  double duration) {
-        Vector3[] velocityChange = {new Vector3(), new Vector3()}, rotationChange = {new Vector3(), new Vector3()};
-        Vector3 deltaVel;
+        Vector3d[] velocityChange = {new Vector3d(), new Vector3d()}, rotationChange = {new Vector3d(), new Vector3d()};
+        Vector3d deltaVel;
         velocityIterationsUsed = 0;
         while (velocityIterationsUsed < velocityIterations) {
             double max = velocityEpsilon;
@@ -101,8 +100,12 @@ public class ContactResolver {
                     if (c[i].body[b] != null) {
                         for (int d = 0; d < 2; d++) {
                             if (c[i].body[b] == c[index].body[d]) {
-                                deltaVel = velocityChange[d].addNew(rotationChange[d].vectorProductNew(c[i].relativeContactPosition[b]));
-                                c[i].contactVelocity.add(c[i].contactToWorld.transformTranspose(deltaVel).mulNew(b != 0 ? -1 : 1));
+                                deltaVel = new Vector3d(velocityChange[d])
+                                        .add(new Vector3d(rotationChange[d]).cross(c[i].relativeContactPosition[b]));
+                                c[i].contactVelocity.add(new org.joml.Matrix3d(c[i].contactToWorld)
+                                        .transpose()
+                                        .transform(deltaVel)
+                                        .mul(b != 0 ? -1 : 1));
                                 c[i].calculateDesiredDeltaVelocity(duration);
                             }
                         }

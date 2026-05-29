@@ -1,16 +1,17 @@
 package com.bxwbb.force;
 
-import com.bxwbb.math.Matrix3;
-import com.bxwbb.math.Vector3;
+import com.bxwbb.phy.Maths;
 import com.bxwbb.phy.RigidBody;
+import org.joml.Matrix3d;
+import org.joml.Vector3d;
 
 public class AeroControl extends Aero {
 
-    public Matrix3 maxTensor;
-    public Matrix3 minTensor;
+    public Matrix3d maxTensor;
+    public Matrix3d minTensor;
     public double controlSetting;
 
-    public AeroControl(Matrix3 base, Matrix3 max, Matrix3 min, Vector3 position, Vector3 windspeed) {
+    public AeroControl(Matrix3d base, Matrix3d max, Matrix3d min, Vector3d position, Vector3d windspeed) {
         super(base, position, windspeed);
         this.maxTensor = max;
         this.minTensor = min;
@@ -19,18 +20,15 @@ public class AeroControl extends Aero {
 
     @Override
     public void updateForce(RigidBody body, double duration) {
-        Matrix3 tensor = getTensor();
-        updateForceFromTensor(body, duration, tensor);
+        updateForceFromTensor(body, duration, getTensor());
     }
 
-    public Matrix3 getTensor() {
-        if (controlSetting <= -1.0f) return minTensor;
-        else if (controlSetting >= 1.0f) return maxTensor;
-        else if (controlSetting < 0) {
-            return Matrix3.linearInterpolate(minTensor, tensor, controlSetting + 1.0f);
-        } else if (controlSetting > 0) {
-            return Matrix3.linearInterpolate(tensor, maxTensor, controlSetting);
-        } else return tensor;
+    public Matrix3d getTensor() {
+        if (controlSetting <= -1.0d) return minTensor;
+        if (controlSetting >= 1.0d) return maxTensor;
+        if (controlSetting < 0) return Maths.linearInterpolate(minTensor, tensor, controlSetting + 1.0d);
+        if (controlSetting > 0) return Maths.linearInterpolate(tensor, maxTensor, controlSetting);
+        return tensor;
     }
 
     public void setControl(double value) {

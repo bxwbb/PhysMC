@@ -1,12 +1,12 @@
 package com.bxwbb.cd;
 
-import com.bxwbb.math.Vector3;
+import org.joml.Vector3d;
 
 public class CollisionBox extends CollisionPrimitive {
 
-    public Vector3 halfSize;
+    public Vector3d halfSize;
 
-    public CollisionBox(Vector3 halfSize) {
+    public CollisionBox(Vector3d halfSize) {
         this.halfSize = halfSize;
     }
 

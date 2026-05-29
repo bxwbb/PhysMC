@@ -1,14 +1,14 @@
 package com.bxwbb.cd;
 
-import com.bxwbb.math.Vector3;
+import org.joml.Vector3d;
 
 public class CollisionPlane extends CollisionPrimitive {
 
-    public Vector3 direction;
+    public Vector3d direction;
     public double offset;
 
-    public CollisionPlane(Vector3 direction, double offset) {
-        this.direction = direction;
+    public CollisionPlane(Vector3d direction, double offset) {
+        this.direction = direction.normalize(new Vector3d());
         this.offset = offset;
     }
 

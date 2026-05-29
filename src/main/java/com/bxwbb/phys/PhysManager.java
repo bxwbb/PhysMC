@@ -4,7 +4,7 @@ import com.bxwbb.phy.World;
 
 public class PhysManager {
 
-    public final World world = new World();
+    public final World world = World.getInstance();
 
     private long lastUpdateTime = 0;
 
@@ -22,10 +22,15 @@ public class PhysManager {
 
     public void tick() {
         long currentTime = System.currentTimeMillis();
+        if (lastUpdateTime == 0) {
+            lastUpdateTime = currentTime;
+            return;
+        }
+
         long deltaTime = currentTime - lastUpdateTime;
         world.startFrame();
-        world.runPhysics(deltaTime / 1000d);
-        lastUpdateTime = System.currentTimeMillis();
+        world.runPhysics(Math.min(deltaTime / 1000d, 0.05d));
+        lastUpdateTime = currentTime;
     }
 
 }

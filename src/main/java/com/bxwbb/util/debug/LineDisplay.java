@@ -1,12 +1,12 @@
 package com.bxwbb.util.debug;
 
 import com.bxwbb.phy.PhysObject;
-import com.bxwbb.math.Vector3;
 import com.bxwbb.util.SpawnUtil;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.BlockDisplay;
 import org.bukkit.entity.Display;
+import org.joml.Vector3d;
 
 import java.util.List;
 
@@ -36,13 +36,13 @@ public class LineDisplay extends PhysObject {
     }
 
     @Override
-    public Vector3 getPosition() {
+    public Vector3d getPosition() {
         Location location = blockDisplay.getLocation();
-        return new Vector3(location.getX(), location.getY(), location.getZ());
+        return new Vector3d(location.getX(), location.getY(), location.getZ());
     }
 
     @Override
-    public void setPosition(Vector3 location) {
+    public void setPosition(Vector3d location) {
         blockDisplay.teleport(new Location(blockDisplay.getWorld(), location.x, location.y, location.z));
     }
 }

@@ -1,25 +1,19 @@
 package com.bxwbb.force;
 
-import com.bxwbb.math.Matrix3;
-import com.bxwbb.math.Quaternion;
-import com.bxwbb.math.Vector3;
-import com.bxwbb.phy.RigidBody;
+import org.joml.Matrix3d;
+import org.joml.Quaterniond;
+import org.joml.Vector3d;
 
 public class AngledAero extends Aero {
 
-    public Quaternion orientation;
+    public Quaterniond orientation;
 
-    public AngledAero(Matrix3 tensor, Vector3 position, Vector3 windspeed) {
+    public AngledAero(Matrix3d tensor, Vector3d position, Vector3d windspeed) {
         super(tensor, position, windspeed);
-        this.orientation = new Quaternion(0, 0, 0, 1);
+        this.orientation = new Quaterniond();
     }
 
-    public void setOrientation(Quaternion orientation) {
+    public void setOrientation(Quaterniond orientation) {
         this.orientation = orientation;
-    }
-
-    @Override
-    public void updateForce(RigidBody body, double duration) {
-        super.updateForce(body, duration);
     }
 }
