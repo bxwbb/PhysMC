@@ -5,4 +5,40 @@ api-version: 1.21
 
 commands:
   physmc:
-    description: 控制物理系统
+    description: Control PhysMC.
+    permission: physmc.command
+    permission-message: You do not have permission to use PhysMC commands.
+
+permissions:
+  physmc.command:
+    description: Allows using /physmc.
+    default: op
+  physmc.tool.gravity:
+    description: Allows using the fishing-rod gravity gun.
+    default: op
+  physmc.tool.selection:
+    description: Allows using the selection tool.
+    default: op
+  physmc.tool.connection:
+    description: Allows using the connection marker tool.
+    default: op
+  physmc.tool.constraint:
+    description: Allows using the constraint selection tool.
+    default: op
+  physmc.tool.cut:
+    description: Allows using the constraint cut tool.
+    default: op
+  physmc.tool.attack:
+    description: Allows punching physical rigid bodies.
+    default: op
+  physmc.admin:
+    description: Grants all PhysMC permissions.
+    default: op
+    children:
+      physmc.command: true
+      physmc.tool.gravity: true
+      physmc.tool.selection: true
+      physmc.tool.connection: true
+      physmc.tool.constraint: true
+      physmc.tool.cut: true
+      physmc.tool.attack: true

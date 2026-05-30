@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>io.github.bxwbb</groupId>
+  <artifactId>physmc-api</artifactId>
+  <version>1.0.0</version>
+  <name>PhysMC API</name>
+  <description>Public API for integrating Bukkit/Paper plugins with PhysMC physics bodies, constraints and contact events.</description>
+  <url>https://github.com/bxwbb/PhysMC</url>
+  <licenses>
+    <license>
+      <name>GNU General Public License v3.0</name>
+      <url>https://www.gnu.org/licenses/gpl-3.0.en.html</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+  <developers>
+    <developer>
+      <id>bxwbb</id>
+      <name>bxwbb</name>
+      <url>https://github.com/bxwbb</url>
+    </developer>
+  </developers>
+  <scm>
+    <connection>scm:git:https://github.com/bxwbb/PhysMC.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com/bxwbb/PhysMC.git</developerConnection>
+    <url>https://github.com/bxwbb/PhysMC</url>
+  </scm>
+  <dependencies>
+    <dependency>
+      <groupId>org.joml</groupId>
+      <artifactId>joml</artifactId>
+      <version>1.10.8</version>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.sonatype.central</groupId>
+        <artifactId>central-publishing-maven-plugin</artifactId>
+        <version>0.10.0</version>
+        <extensions>true</extensions>
+      </plugin>
+    </plugins>
+  </build>
+</project>

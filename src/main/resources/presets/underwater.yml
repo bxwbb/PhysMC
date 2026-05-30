@@ -1,0 +1,10 @@
+values:
+  buoyancy-enabled: true
+  water-density: 1200.0
+  water-linear-drag: 4.0
+  water-angular-drag: 2.5
+  water-horizontal-flow: 0.6
+  water-falling-flow: 0.6
+  linear-damping: 0.02
+  angular-damping: 0.05
+  attack-impulse: 60

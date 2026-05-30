@@ -7,7 +7,7 @@
 
     <groupId>com.bxwbb</groupId>
     <artifactId>PhysMC</artifactId>
-    <version>5.0.0</version>
+    <version>1.0.0</version>
     <name>PhysMC</name>
 
     <properties>
@@ -160,7 +160,7 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
-                            <minimizeJar>true</minimizeJar>
+                            <minimizeJar>false</minimizeJar>
                             <relocations>
                                 <relocation>
                                     <pattern>com.zaxxer.hikari</pattern>

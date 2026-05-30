@@ -1,8 +1,14 @@
 package com.bxwbb;
 
 import com.bxwbb.event.DisplayHitListener;
+import com.bxwbb.persistence.PersistentGroupStore;
 import com.bxwbb.phys.PhysManager;
+import com.bxwbb.physmc.api.PhysMCApi;
+import com.bxwbb.physmc.api.internal.PhysWorldAdapter;
 import com.bxwbb.util.SpawnUtil;
+import com.bxwbb.util.debug.SpringDisplay;
+import com.bxwbb.util.debug.DebugOverlayManager;
+import com.bxwbb.util.debug.TextDebugDisplay;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.EntityType;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -17,26 +23,55 @@ import java.util.List;
 
 public class PhysMC extends JavaPlugin {
 
+    private PersistentGroupStore persistentGroupStore;
+
     @Override
     public void onEnable() {
         super.onEnable();
         printStartupLogo();
         saveDefaultConfig();
+        saveDefaultPresets();
         getConfig().options().copyDefaults(true);
         migrateLegacyConfigKeys();
         populateEntityTypeMassDefaults();
         saveConfig();
+        persistentGroupStore = new PersistentGroupStore(this);
+        PhysMCApi.register(new PhysWorldAdapter(this));
 
         new PhysCommand(this);
-        getServer().getPluginManager().registerEvents(new DisplayHitListener(), this);
+        getServer().getPluginManager().registerEvents(new DisplayHitListener(this), this);
+        persistentGroupStore.loadAll();
 
         Bukkit.getScheduler().runTaskTimer(this, PhysManager.getInstance()::tick, 0L, 1L);
+        Bukkit.getScheduler().runTaskTimer(this, SpringDisplay::tickAll, 0L, 1L);
+        Bukkit.getScheduler().runTaskTimer(this, DebugOverlayManager::tickAll, 0L, 1L);
+        Bukkit.getScheduler().runTaskTimer(this, TextDebugDisplay::tickAll, 0L, 1L);
     }
 
     @Override
     public void onDisable() {
         super.onDisable();
+        PhysMCApi.unregister();
         SpawnUtil.removeAll();
+    }
+
+    public PersistentGroupStore persistentGroupStore() {
+        return persistentGroupStore;
+    }
+
+    private void saveDefaultPresets() {
+        savePresetResource("presets/billiards.yml");
+        savePresetResource("presets/ice.yml");
+        savePresetResource("presets/moon.yml");
+        savePresetResource("presets/heavy.yml");
+        savePresetResource("presets/underwater.yml");
+        savePresetResource("presets/sticky.yml");
+    }
+
+    private void savePresetResource(String path) {
+        if (!new java.io.File(getDataFolder(), path).isFile()) {
+            saveResource(path, false);
+        }
     }
 
     private void migrateLegacyConfigKeys() {
@@ -60,7 +95,7 @@ public class PhysMC extends JavaPlugin {
     private double defaultMassForType(EntityType type) {
         String name = type.name();
         if ("PLAYER".equals(name)) {
-            return getConfig().getDouble(PhysConfig.ENTITY_DEFAULT_MASS_PLAYER, 80.0d);
+            return getConfig().getDouble(PhysConfig.ENTITY_DEFAULT_MASS_PLAYER, 0.0d);
         }
         if (isLightEntityType(name)) {
             return 1.0d;

@@ -22,6 +22,10 @@ public abstract class PhysObject {
         ObjectUtil.addDisplay(name, getAllDisplay().toArray(new Display[0]));
     }
 
+    public void addWithName(String group, String name) {
+        ObjectUtil.addDisplay(group, name, getAllDisplay().toArray(new Display[0]));
+    }
+
     public abstract Vector3d getPosition();
 
     public abstract void setPosition(Vector3d location);

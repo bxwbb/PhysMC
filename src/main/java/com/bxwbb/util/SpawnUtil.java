@@ -1,6 +1,8 @@
 package com.bxwbb.util;
 
 import com.bxwbb.event.DisplayHitListener;
+import com.bxwbb.PhysConfig;
+import com.bxwbb.PhysMC;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -25,6 +27,7 @@ public class SpawnUtil {
 
     public static TextDisplay spawnTextDisplay(Location location) {
         TextDisplay textDisplay = location.getWorld().spawn(location, TextDisplay.class);
+        configureInterpolation(textDisplay);
         displays.add(textDisplay);
         return textDisplay;
     }
@@ -47,34 +50,47 @@ public class SpawnUtil {
         displays.remove(blockDisplay);
     }
 
-    // ====================== 线段生成：全部 -1.5 修正漂移 ======================
     public static BlockDisplay spawnSegment(Location start, Location end, float width) {
         if (start == null || end == null || !start.getWorld().equals(end.getWorld()))
             return null;
 
         Vector startVec = start.toVector();
         Vector endVec = end.toVector();
-        Vector dir = endVec.subtract(startVec);
+        Vector dir = endVec.clone().subtract(startVec);
         double length = dir.length();
         if (length < 0.0001)
             return null;
         dir.normalize();
 
-        // 中心点全部 -1.5 修正漂移
-        Vector centerVec = startVec.clone().add(dir.clone().multiply(length * 0.5));
-        Location centerLoc = new Location(
-                start.getWorld(),
-                centerVec.getX() + 0.5,
-                centerVec.getY() + 0.5,
-                centerVec.getZ() + 0.5
-        );
+        BlockDisplay display = spawnOrientedBlock(start, getRotation(new Vector(1, 0, 0), dir), new Vector3f((float) length, width, width), new Vector3f(0.0f, -width * 0.5f, -width * 0.5f));
+        return display;
+    }
+
+    public static boolean updateSegment(BlockDisplay display, Location start, Location end, float width) {
+        if (start == null || end == null || !start.getWorld().equals(end.getWorld()))
+            return false;
+
+        Vector startVec = start.toVector();
+        Vector endVec = end.toVector();
+        Vector dir = endVec.clone().subtract(startVec);
+        double length = dir.length();
+        if (length < 0.0001)
+            return false;
+        dir.normalize();
 
         Quaternionf rotation = getRotation(new Vector(1, 0, 0), dir);
         Vector3f scale = new Vector3f((float) length, width, width);
+        Vector3f translation = new Vector3f(0.0f, -width * 0.5f, -width * 0.5f);
 
-        BlockDisplay segment = spawnOrientedBlock(centerLoc, rotation, scale);
-        displays.add(segment);
-        return segment;
+        display.teleport(start);
+        configureInterpolation(display);
+        display.setTransformation(new Transformation(
+                translation,
+                rotation,
+                scale,
+                new Quaternionf(0, 0, 0, 1)
+        ));
+        return true;
     }
 
     private static Quaternionf getRotation(Vector from, Vector to) {
@@ -93,12 +109,16 @@ public class SpawnUtil {
     }
 
     public static BlockDisplay spawnOrientedBlock(Location location, Quaternionf rotation, Vector3f scale) {
+        return spawnOrientedBlock(location, rotation, scale, new Vector3f());
+    }
+
+    public static BlockDisplay spawnOrientedBlock(Location location, Quaternionf rotation, Vector3f scale, Vector3f translation) {
         BlockDisplay display = (BlockDisplay) location.getWorld().spawnEntity(location, EntityType.BLOCK_DISPLAY);
         BlockData blockData = Bukkit.createBlockData(Material.BLUE_CONCRETE);
         display.setBlock(blockData);
 
         display.setTransformation(new Transformation(
-                new Vector3f(0, 0, 0),
+                translation,
                 rotation,
                 scale,
                 new Quaternionf(0, 0, 0, 1)
@@ -107,8 +127,16 @@ public class SpawnUtil {
         display.setShadowRadius(0);
         display.setShadowStrength(0);
         display.setBrightness(new Display.Brightness(15, 15));
+        configureInterpolation(display);
         display.setPersistent(false);
         return display;
+    }
+
+    public static void configureInterpolation(Display display) {
+        PhysMC plugin = PhysMC.getPlugin(PhysMC.class);
+        display.setInterpolationDelay(plugin.getConfig().getInt(PhysConfig.DISPLAY_INTERPOLATION_DELAY));
+        display.setInterpolationDuration(plugin.getConfig().getInt(PhysConfig.DISPLAY_INTERPOLATION_DURATION));
+        display.setTeleportDuration(plugin.getConfig().getInt(PhysConfig.DISPLAY_TELEPORT_DURATION));
     }
 
     public static void removeDisplay(Display display) {

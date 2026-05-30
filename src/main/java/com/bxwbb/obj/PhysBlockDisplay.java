@@ -19,6 +19,8 @@ import java.util.List;
 
 public class PhysBlockDisplay extends RigidBody {
 
+    private static final double MAX_SAFE_COORDINATE = 2.9e7d;
+
     private final BlockDisplay blockDisplay;
 
     public PhysBlockDisplay(Location location) {
@@ -51,6 +53,10 @@ public class PhysBlockDisplay extends RigidBody {
 
     @Override
     public void tick() {
+        if (!isSafePosition()) {
+            blockDisplay.remove();
+            return;
+        }
         configureInterpolation();
         blockDisplay.teleport(new Location(blockDisplay.getWorld(), position.x, position.y, position.z, 0, 0));
 
@@ -65,6 +71,16 @@ public class PhysBlockDisplay extends RigidBody {
                 scale,
                 new Quaternionf(0,0,0,1)
         ));
+    }
+
+    private boolean isSafePosition() {
+        return Double.isFinite(position.x)
+                && Double.isFinite(position.y)
+                && Double.isFinite(position.z)
+                && Math.abs(position.x) <= MAX_SAFE_COORDINATE
+                && Math.abs(position.z) <= MAX_SAFE_COORDINATE
+                && position.y > -4096.0d
+                && position.y < 4096.0d;
     }
 
     private void configureInterpolation() {

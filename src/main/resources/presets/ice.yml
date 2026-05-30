@@ -1,0 +1,10 @@
+values:
+  gravity-y: -10.0
+  restitution: 0.2
+  static-restitution: 0.2
+  static-friction: 0.04
+  dynamic-friction: 0.004
+  rolling-friction: 0.004
+  linear-damping: 0.001
+  angular-damping: 0.003
+  attack-impulse: 80
